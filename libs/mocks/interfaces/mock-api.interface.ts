@@ -1,6 +1,6 @@
-import { RequestMethodEnum } from '~mocks/enums/request-method.enum';
+import { RequestMethodEnum } from "~mocks/enums/request-method.enum";
 
 export interface MockApi {
-    method: RequestMethodEnum;
-    response: any[];
+  method: RequestMethodEnum;
+  response: any[];
 }

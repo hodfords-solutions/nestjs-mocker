@@ -1,0 +1,32 @@
+{
+  "name": "example",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "format": "prettier --write \"src/**/*.ts\"",
+    "prebuild": "rimraf dist",
+    "copy-files": "copyfiles -u 1 src/static/** dist/",
+    "build": "tsc && yarn copy-files",
+    "start": "nest start",
+    "start:dev": "npm run prebuild && yarn copy-files && nest start --watch"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@diginexhk/typeorm-helper": "0.0.18",
+    "@nestjs/common": "^8.0.6",
+    "@nestjs/core": "^8.0.6",
+    "@nestjs/swagger": "^5.0.9",
+    "@nestjs/typeorm": "^8.0.2",
+    "@types/node": "^16.9.1",
+    "copyfiles": "^2.4.1",
+    "dotenv": "^10.0.0",
+    "pg": "^8.7.1",
+    "rimraf": "^3.0.2",
+    "rxjs": "^7.3.0",
+    "swagger-ui-express": "^4.1.6",
+    "tsconfig-paths": "^3.11.0",
+    "typeorm": "^0.2.37",
+    "typescript": "^4.4.3"
+  }
+}

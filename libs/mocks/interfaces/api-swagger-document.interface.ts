@@ -1,14 +1,14 @@
 interface Endpoint {
-    operationId: string;
-    summary?: string;
-    description?: string;
-    tags: string[];
+  operationId: string;
+  summary?: string;
+  description?: string;
+  tags: string[];
 }
 
 interface Endpoints {
-    [method: string]: Endpoint;
+  [method: string]: Endpoint;
 }
 
 export interface ApiSwaggerDocumentInterface {
-    [endpoint: string]: Endpoints;
+  [endpoint: string]: Endpoints;
 }
