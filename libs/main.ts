@@ -9,9 +9,7 @@ async function boostrap() {
     app.useStaticAssets(join(__dirname, 'static'));
     app.setBaseViewsDir(join(__dirname, 'views'));
     app.setViewEngine('hbs');
-    hbs.registerHelper('json', function (obj) {
-        return new hbs.SafeString(JSON.stringify(obj));
-    });
+    hbs.registerHelper('json', (obj) => new hbs.SafeString(JSON.stringify(obj)));
 }
 
 boostrap();

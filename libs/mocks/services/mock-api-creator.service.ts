@@ -17,7 +17,7 @@ import { readFileSync, writeFileSync } from 'fs';
 import { UpdateMockApiJson } from '~mocks/interfaces/update-mock-api-json.interface';
 import { map } from 'lodash';
 import { getMetadataArgsStorage } from 'typeorm';
-import { ColumnMeteArgs } from '~mocks/interfaces/column-mete-args.interface';
+import { ColumnMetaArgs } from '~mocks/interfaces/column-meta-args.interface';
 import { MOCK_API_PATH } from '~mocks/constants/mock-api-path.constant';
 import { MAXIMUM_RANDOM_RESPONSE } from '~mocks/constants/maximum-random-response.constant';
 
@@ -58,7 +58,7 @@ export class MockApiCreatorService {
         }));
     }
 
-    static getCurrentEntities(excludes: string[] = []): Record<string, ColumnMeteArgs[]> {
+    static getCurrentEntities(excludes: string[] = []): Record<string, ColumnMetaArgs[]> {
         const tables = getMetadataArgsStorage().tables;
         const columns = getMetadataArgsStorage().columns;
         const mapColumnsToTable = tables.reduce((acc, table) => {
