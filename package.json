@@ -1,0 +1,41 @@
+{
+  "name": "nestjs-mocker",
+  "version": "1.0.0",
+  "description": "",
+  "main": ".eslintrc.js",
+  "scripts": {
+    "format": "prettier --write \"libs/**/*.ts\"",
+    "prebuild": "rimraf dist",
+    "build": "tsc",
+    "start:dev": "npm run prebuild && nest start --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hodford/nestjs-mocker.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hodford/nestjs-mocker/issues"
+  },
+  "homepage": "https://github.com/hodford/nestjs-mocker#readme",
+  "devDependencies": {
+    "@nestjs/common": "^8.0.6",
+    "@nestjs/core": "^8.0.6",
+    "@nestjs/swagger": "^5.0.9",
+    "@types/node": "^16.9.1",
+    "prettier": "^2.4.0",
+    "rimraf": "^3.0.2",
+    "rxjs": "^7.3.0",
+    "typescript": "^4.4.3"
+  },
+  "dependencies": {
+    "@nestjs/platform-express": "^8.0.6",
+    "@nestjs/typeorm": "github:nestjs/typeorm",
+    "class-validator": "^0.13.1",
+    "faker": "^5.5.3",
+    "hbs": "^4.1.2",
+    "typeorm": "^0.2.37",
+    "uuid": "^8.3.2"
+  }
+}

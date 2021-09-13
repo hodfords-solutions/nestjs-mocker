@@ -1,0 +1,71 @@
+.toast {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+}
+
+.form-wrapper {
+    margin: 30px 450px;
+}
+
+.action-container {
+    display: flex;
+    padding: 0 !important;
+    height: 40px;
+}
+
+.action-container > div {
+    padding-right: 10px;
+}
+
+.request-methods-wrapper {
+    width: 16%;
+}
+
+#endpoint-wrapper {
+    width: 75%;
+}
+
+.delay-wrapper {
+    width: 15%;
+}
+
+.form-select-property {
+    width: 20% !important;
+    margin: 0
+}
+
+.faker-methods-select {
+    width: 250px !important;
+}
+
+.form-control-key {
+    width: 25% !important;
+}
+
+.override-value-input {
+    width: 250px !important;
+}
+
+.add-nested-property-btn {
+    width: 35px;
+}
+
+.endpoint-group {
+    height: 30px !important;
+}
+
+.remove-property-btn {
+    opacity: 0 !important;
+}
+
+.remove-property-btn:hover {
+    opacity: 100 !important;
+    transition: opacity 0.7s;
+}
+
+.is-required-checkbox {
+    width: 28px;
+    height: 16px;
+    margin: 12px 2px 0px 10px;
+}

@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Mock Api Creat page</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel='stylesheet' href='/index.css'>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj"
+            crossorigin="anonymous"></script>
+</head>
+<body>
+<div class="toast toast-success">
+    <div class="toast-header bg-success">
+        <strong class="mr-auto text-white">Success</strong>
+    </div>
+    <div class="toast-body text-success">
+        Add mock API successfully!
+    </div>
+</div>
+<div class="toast toast-failed">
+    <div class="toast-header bg-danger">
+        <strong class="mr-auto text-white">Failed!</strong>
+    </div>
+    <div class="toast-body text-danger">
+        Please check your input again!
+    </div>
+</div>
+<div class='form-wrapper d-flex flex-column justify-content-center'>
+    <form class='needs-validation' novalidate>
+        <div class='form-row'>
+            <div class='action-container container-lg'>
+                <div class='request-methods-wrapper'>
+                    <select class='form-select form-select-sm request-method-select'>
+                        {{#each requestMethods}}
+                            <option value={{this}}>{{this}}</option>
+                        {{/each}}
+                    </select>
+                </div>
+                <div id='endpoint-wrapper' class="input-group">
+                    <span class="input-group-text endpoint-group">Endpoint</span>
+                    <input
+                        type="text" class="form-control endpoint endpoint-group" placeholder="/users/:id"
+                        aria-label="/users/:id"
+                        aria-describedby="basic-addon2"
+                        required
+                    >
+                </div>
+                <div class='delay-wrapper'>
+                    <select class='form-select form-select-sm delay-select'>
+                        {{#each delaySelection}}
+                            <option value={{this}}>{{this}}s</option>
+                        {{/each}}
+                    </select>
+
+                </div>
+            </div>
+            <div class='body-container mt-4 py-4 px-4 border border-dark rounded'>
+                <div class='body d-flex justify-content-between'>
+                    <span class='h4'>Body</span>
+                    <div>
+                        <div class="form-check">
+                            <input class="has-body-checkbox form-check-input" type="checkbox" value=""
+                                   id="hasBodyCheckbox"
+                                   onchange='toggleAddBodyCheckBox()' checked>
+                            <label class="form-check-label" for="flexCheckChecked">
+                                Has body
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class='body-properties-wrapper d-flex flex-center flex-column mb-2 mt-3'></div>
+                <button class='add-body-property-btn add-btn btn btn-primary rounded-circle'
+                        onclick='handleCLickAddProperty(event)'>+
+                </button>
+            </div>
+            <div class='response-container mt-5 py-4 px-4 border border-dark rounded'>
+                <span class='h4'>Response</span>
+                <div class='response-properties-wrapper d-flex flex-center flex-column mb-2 mt-4'></div>
+                <button class='add-response-property-btn add-btn btn btn-primary rounded-circle mt-1'
+                        onclick='handleCLickAddProperty(event)'>
+                    +
+                </button>
+            </div>
+            <div class="d-flex align-items-end flex-column bd-highlight mt-3">
+                <button
+                    class='add-response-property-btn add-btn btn btn-primary mt-1'
+                    type='submit'
+                >
+                    Add API
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+</body>
+</html>
+<script>
+    const BACKEND_API = '/mock-api-creator';
+    const TYPES_SELECTION = ['', ...{{json typeSelection}}];
+    const ENTITIES_SELECTION = { ['']: [], ...{{json entities}} };
+    const FAKER_METHODS_SELECTION = {{json fakerMethods}}
+
+    const isFakerType = (type => type === 'FAKER');
+    const isPrimitiveType = (type => type === 'NUMBER' || type === 'STRING');
+    const isObjectType = (type => type === 'OBJECT' || type === 'ARRAY_OBJECT');
+    const isArrayOfPrimitiveType = (type => type === 'ARRAY_STRING' || type === 'ARRAY_NUMBER');
+    const isEnumType = (type => type === 'ENUM');
+    const isEntitiesType = (type => type === 'ENTITIES');
+
+    /* HANDLE SUBMIT*/
+
+    window.addEventListener('load', function() {
+        const forms = $('.needs-validation');
+        Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    $('.toast-failed').toast('show');
+                } else {
+                    handleClickSubmit(event);
+                    form.reset();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+
+    function isValidEndpoint(endpoint) {
+        const [_, resource] = endpoint.split('/');
+        return endpoint[0] === '/' && !!resource;
+    }
+
+    function getProperty(property) {
+        const propertyData = {};
+        const children = $(property).children();
+        const key = children.filter(ele => children[ele].className.includes('key')).val();
+        const type = children.filter(ele => children[ele].className.includes('type')).val();
+        const isRequired = children.filter(ele => children[ele].className.includes('is-required-checkbox')).is(':checked');
+        const overrideValue = children.filter(ele => children[ele].className.includes('override-value-input')).val();
+        const defaultValue = children.filter(ele => children[ele].className.includes('default-value-input')).val();
+
+        if (overrideValue) {
+            propertyData.overrideValue = overrideValue;
+        }
+        if (defaultValue) {
+            propertyData.defaultValue = defaultValue;
+        }
+        if (isFakerType(type)) {
+            const fakerMethod = children.filter(ele => children[ele].className.includes('faker-methods-select')).val();
+            const [category, method] = fakerMethod.split('-');
+            propertyData.fakerType = { category, method };
+        }
+
+        if (isObjectType(type) || isArrayOfPrimitiveType(type) || isEnumType(type)) {
+            const items = [];
+            const nestedPropertiesWrapper = $(property).next().children().filter('.wrapper-property');
+            for (const nestedProperty of nestedPropertiesWrapper) {
+                const nestedPropertyData = getProperty($(nestedProperty).children().filter(ele => children[ele].className.includes('key')));
+                items.push(...nestedPropertyData);
+            }
+            propertyData.items = items;
+
+        }
+
+        if (isEntitiesType(type)) {
+            const properties = [];
+            const nestedPropertiesWrapper = $(property).next().children().filter('.wrapper-property');
+            for (const nestedProperty of nestedPropertiesWrapper) {
+                const nestedPropertyData = getProperty($(nestedProperty).children().filter(ele => children[ele].className.includes('key')));
+                properties.push(...nestedPropertyData);
+            }
+            return properties;
+        }
+
+        propertyData.key = key;
+        propertyData.type = type;
+        propertyData.isRequired = isRequired;
+
+        return [propertyData];
+    }
+
+    function getData(where) {
+        const data = [];
+        for (const property of $(where)) {
+            data.push(...getProperty(property));
+        }
+        return data;
+    }
+
+    function handleClickSubmit(event) {
+        event.preventDefault();
+
+        const body = getData('.body-property');
+        const response = getData('.response-property');
+        const method = $('.request-method-select').val();
+        const endpoint = $('.endpoint').val();
+        const delay = Number($('.delay-select').val());
+
+        if (!isValidEndpoint(endpoint)) {
+            return $('.toast-failed').toast('show');
+        }
+
+        const data = {
+            method,
+            endpoint,
+            delay,
+            body,
+            response
+        };
+
+        $.ajax({
+            type: 'POST',
+            url: BACKEND_API,
+            data: JSON.stringify(data),
+            dataType: 'json',
+            contentType: 'application/json',
+            success: function() {
+                $('.toast-success').toast('show');
+                setTimeout(() => {
+                    location.reload();
+                }, 3000);
+            },
+            error: function(xhr, type, thrownError) {
+            }
+        });
+    }
+
+    /* COMPONENTS */
+    function createComponentFactory({
+                                        id,
+                                        tag,
+                                        className,
+                                        value,
+                                        text,
+                                        type,
+                                        innerHTML,
+                                        onClick,
+                                        onChange,
+                                        placeholder,
+                                        labelFor,
+                                        name,
+                                        isRequired,
+                                        isSelected,
+                                        isChecked
+                                    }) {
+        const element = document.createElement(tag);
+        if (id) {
+            element.id = id;
+        }
+        if (className) {
+            element.className = className;
+        }
+        if (value) {
+            element.value = value;
+        }
+        if (text) {
+            element.text = text;
+        }
+        if (type) {
+            element.type = type;
+        }
+        if (innerHTML) {
+            element.innerHTML = innerHTML;
+        }
+        if (placeholder) {
+            element.placeholder = placeholder;
+        }
+        if (labelFor) {
+            element.name = name;
+        }
+        if (labelFor) {
+            element.for = labelFor;
+        }
+        if (isRequired) {
+            element.required = 'required';
+        }
+        if (isSelected) {
+            element.selected = true;
+        }
+        if (isChecked) {
+            element.checked = true;
+        }
+        if (onClick) {
+            element.onclick = (event) => onClick(event, element);
+        }
+        if (onChange) {
+            element.onchange = (event) => onChange(event, element);
+        }
+
+        return element;
+    }
+
+    const RemoveBtnComponent = ({ onClick }) => {
+        return createComponentFactory({
+            tag: 'button', className: 'remove-property-btn btn btn-close mt-2 ms-1 ',
+            onClick
+        });
+    };
+
+    const InputKeyComponent = ({ value = '' }) => {
+        return createComponentFactory({
+            tag: 'input',
+            value,
+            className: 'key rounded border border-1 me-1 p-2 bg-light form-control form-control-key',
+            type: 'text',
+            placeholder: 'Field name',
+            isRequired: true
+        });
+    };
+
+    const CheckboxComponent = ({ className = '' }) => {
+        return createComponentFactory({
+            tag: 'input',
+            className,
+            type: 'checkbox',
+            isChecked: true
+        });
+    };
+
+    const CustomSelectTypesComponent = ({ value = '', options }) => {
+        const selectTypes = createComponentFactory({
+            tag: 'select',
+            className: 'type form-select form-select-sm form-select-property me-1 bg-light',
+            isRequired: true,
+            onChange: (event, element) => handleOnchangeTypeSelection(element)
+        });
+        for (const item of options) {
+            const option = createComponentFactory({
+                tag: 'option',
+                value: item,
+                text: item,
+                isSelected: value === item
+            });
+            selectTypes.appendChild(option);
+        }
+        return selectTypes;
+    };
+
+    const CustomWrapperPropertyComponent = ({ className }) => {
+        return createComponentFactory({
+            tag: 'div',
+            className
+        });
+    };
+
+    const OverrideValueInputComponent = (placeholder) => {
+        return createComponentFactory({
+            tag: 'input', className: 'override-value-input rounded border border-1 p-2 me-1 bg-light',
+            placeholder: placeholder || 'Set value instead of random'
+        });
+    };
+
+    const DefaultValueInputComponent = (placeholder) => {
+        return createComponentFactory({
+            tag: 'input', className: 'default-value-input rounded border border-1 p-2 me-1 bg-light',
+            placeholder: placeholder || 'Default value'
+        });
+    };
+
+    const SelectFakerMethodsComponent = () => {
+        const selectFakerMethods = createComponentFactory({
+            tag: 'select',
+            className: 'form-select form-select-sm form-select-property faker-methods-select me-1 bg-light'
+        });
+        for (const { category, methods } of FAKER_METHODS_SELECTION) {
+            for (const method of methods) {
+                const option = createComponentFactory({
+                    tag: 'option',
+                    value: `${category}-${method}`,
+                    text: `${category.toUpperCase()} ${method}`
+                });
+                selectFakerMethods.appendChild(option);
+            }
+        }
+        return selectFakerMethods;
+    };
+
+    const SelectEntitiesComponent = () => {
+        const selectFakerMethods = createComponentFactory({
+            tag: 'select',
+            className: 'form-select form-select-sm form-select-property entities-select me-1 bg-light',
+            isRequired: true,
+            onChange: (event, element) => handleOnchangeEntitiesSelection({
+                element,
+                properties: ENTITIES_SELECTION[$(element).val()]
+            })
+        });
+
+        for (const key of Object.keys(ENTITIES_SELECTION)) {
+            const option = createComponentFactory({
+                tag: 'option',
+                value: key,
+                text: key
+            });
+            selectFakerMethods.appendChild(option);
+        }
+        return selectFakerMethods;
+    };
+
+    const AddNestedPropertyButtonComponent = ({ className, nestedPropertyType }) => {
+        return createComponentFactory({
+            className: 'add-nested-property-btn btn btn-success ms-4 mb-2 rounded-circle',
+            tag: 'button',
+            innerHTML: '+',
+            onClick: (event, element) => {
+                event.preventDefault();
+                $(element).before(createNestedPropertyByType({ className, nestedPropertyType }));
+            }
+        });
+    };
+
+    const ObjectOrArrayOfObjectComponent = ({ className = '' }) => {
+        const addNestedPropertyBtn = AddNestedPropertyButtonComponent({
+            className,
+            nestedPropertyType: 'objectOrArrayOfObject'
+        });
+        const nestedProperty = createPropertyComponent({ className });
+        return createNestedProperty({ nestedProperty, addNestedPropertyBtn });
+    };
+
+    const EntityPropertyComponent = ({ keyValue, typeValue, className = '' }) => {
+        const typeSelections = TYPES_SELECTION.filter((type) => type !== 'ENTITIES');
+        return createPropertyComponent({
+            keyValue,
+            typeValue: mapEntityPropertyType(typeValue),
+            typeSelections,
+            requiredCheckbox: true,
+            className
+        });
+    };
+
+    const ArrayOfNumericTypeComponent = ({ className = '' }) => {
+        const addNestedPropertyBtn = AddNestedPropertyButtonComponent({
+            className,
+            nestedPropertyType: 'arrayOfNumeric'
+        });
+        const nestedProperty = createArrayOfNumericTypeProperty({ className });
+        return createNestedProperty({ nestedProperty, addNestedPropertyBtn });
+    };
+
+    const ArrayOfEnumPropertyComponent = ({ className = '' }) => {
+        const addNestedPropertyBtn = AddNestedPropertyButtonComponent({
+            className,
+            nestedPropertyType: 'enum'
+        });
+
+        const nestedProperty = createEnumPropertyComponent({ className });
+        return createNestedProperty({ nestedProperty, addNestedPropertyBtn });
+    };
+
+    const LabelComponent = ({ className = '', labelFor, text = '' }) => {
+        return createComponentFactory({
+            tag: 'label',
+            innerHTML: text,
+            className: `${className} checkbox-label mt-2 ml-2`,
+            for: labelFor
+        });
+    };
+
+    /* METHODS */
+    function mapEntityPropertyType(type) {
+        switch (type) {
+            case 'decimal':
+                return 'NUMBER';
+            case 'timestamp':
+                return 'DATE';
+            default:
+                return '';
+        }
+    }
+
+    function createNestedPropertyByType({ nestedPropertyType, className }) {
+        switch (nestedPropertyType) {
+            case 'arrayOfNumeric':
+                return createArrayOfNumericTypeProperty({ className });
+            case 'objectOrArrayOfObject':
+                return createPropertyComponent({ className });
+            case 'enum':
+                return createEnumPropertyComponent({ className });
+            case 'entity':
+                const typeSelections = TYPES_SELECTION.filter(type => type !== 'ENTITIES');
+                return createPropertyComponent({ className, requiredCheckbox: true, typeSelections });
+        }
+    }
+
+    function createNestedProperty({ nestedProperty, addNestedPropertyBtn }) {
+        const wrapperProperty = CustomWrapperPropertyComponent({ className: 'wrapper-nested-property d-flex flex-column mb-1 ms-5' });
+        wrapperProperty.appendChild(nestedProperty);
+
+        if (addNestedPropertyBtn) {
+            wrapperProperty.appendChild(addNestedPropertyBtn);
+        }
+        return wrapperProperty;
+    }
+
+    function toggleAddBodyCheckBox() {
+        $('.add-body-property-btn').toggle();
+        $('.body-properties-wrapper').children().remove();
+    }
+
+    function showAddBodyProperty(isParentComponentBody) {
+        if (isParentComponentBody) {
+            $('.add-body-property-btn').show();
+        } else {
+            $('.add-response-property-btn').show();
+        }
+    }
+
+    function hideAddBodyProperty(isParentComponentBody) {
+        if (isParentComponentBody) {
+            $('.add-body-property-btn').hide();
+        } else {
+            $('.add-response-property-btn').hide();
+        }
+    }
+
+    function createPropertyComponent({
+                                         keyValue,
+                                         typeValue,
+                                         className = '',
+                                         typeSelections = TYPES_SELECTION,
+                                         requiredCheckbox = false
+                                     }) {
+        const divProperty = createComponentFactory({ tag: 'div', className: `property d-flex me-1 mb-2 ${className}` });
+        const inputKey = InputKeyComponent({ value: keyValue });
+        divProperty.appendChild(inputKey);
+
+        const selectTypes = CustomSelectTypesComponent({ value: typeValue, options: typeSelections });
+        divProperty.appendChild(selectTypes);
+
+        if (requiredCheckbox) {
+            const checkbox = CheckboxComponent({ className: 'is-required-checkbox' });
+            const label = LabelComponent({ labelFor: '', text: 'Is required?' });
+
+            divProperty.appendChild(checkbox);
+            divProperty.appendChild(label);
+        }
+
+        const removeBtn = RemoveBtnComponent({
+            onClick: (event, element) => {
+                event.preventDefault();
+                $(element).parent().next().remove();
+                $(element).parent().parent().remove();
+            }
+        });
+        divProperty.appendChild(removeBtn);
+
+        const wrapperProperty = CustomWrapperPropertyComponent({ className: 'wrapper-property d-flex flex-column mb-1' });
+        wrapperProperty.appendChild(divProperty);
+        return wrapperProperty;
+    }
+
+    function createEnumPropertyComponent({ className = '' }) {
+        const divProperty = createComponentFactory({ tag: 'div', className: `property d-flex me-1 mb-2 ${className}` });
+
+        const inputKey = InputKeyComponent({ value: '' });
+        divProperty.appendChild(inputKey);
+
+        const removeBtn = RemoveBtnComponent({
+            onClick: (event, element) => {
+                event.preventDefault();
+                $(element).parent().next().remove();
+                $(element).parent().remove();
+            }
+        });
+        divProperty.appendChild(removeBtn);
+
+        const wrapperProperty = CustomWrapperPropertyComponent({ className: 'wrapper-property d-flex flex-column mb-1' });
+        wrapperProperty.appendChild(divProperty);
+        return wrapperProperty;
+    }
+
+    function createArrayOfNumericTypeProperty({ className = '' }) {
+        const divProperty = createComponentFactory({ tag: 'div', className: `property d-flex me-1 mb-2 ${className}` });
+        const overrideValueInput = OverrideValueInputComponent();
+        divProperty.appendChild(overrideValueInput);
+
+        const selectTypes = CustomSelectTypesComponent({ options: ['FAKER'] });
+        divProperty.appendChild(selectTypes);
+
+        const selectFakerMethods = SelectFakerMethodsComponent();
+        divProperty.appendChild(selectFakerMethods);
+
+        const removeBtn = RemoveBtnComponent({ onClick: (element) => $(element).parent().remove() });
+        divProperty.appendChild(removeBtn);
+
+        const wrapperProperty = CustomWrapperPropertyComponent({ className: 'wrapper-property d-flex flex-column mb-1' });
+        wrapperProperty.appendChild(divProperty);
+        return wrapperProperty;
+    }
+
+    function handleCLickAddProperty(event) {
+        event.preventDefault();
+        const className = $(event.target).parent()[0].className.includes('body-container') ? 'body-property' : 'response-property';
+        const propertyComponent = createPropertyComponent({
+            className,
+            requiredCheckbox: className === 'body-property'
+        });
+        $(event.target).prev().append(propertyComponent);
+    }
+
+    function createCheckBoxAndLabelComponents(element) {
+        const checkbox = CheckboxComponent({ className: 'is-required-checkbox' });
+        const label = LabelComponent({ labelFor: '', text: 'Is required?' });
+        $(element).after(checkbox);
+        $(checkbox).after(label);
+    }
+
+    function resetNestedProperties({ element, type, existedOverrideValueInput, isParentComponentBody }) {
+        const existedFakerSelection = $(element).next()[0].className.includes('faker-methods-select');
+        const existedNestPropertyHasKey = $($(element).parent().next()?.children()[0]).children()[0]?.className?.includes('nested-property-has-key');
+        const existedAddNestedBtn = $(element).parent().next()?.children('.add-nested-property-btn')[0]?.className.includes('add-nested-property-btn');
+        const existedNestPropertyNoKey = $($(element).parent().next()?.children()[0]).children()[0]?.className?.includes('nested-property-no-key');
+        const existedDefaultValueInput = $(element).next()[0].className.includes('default-value-input');
+        const existedEntitiesSelect = $(element).next()[0].className.includes('entities-select');
+        const resetFieldName = () => {
+            $(element).prev().val('');
+            $(element).prev().attr('disabled', false);
+            $(element).prev().attr('placeholder', 'Field name');
+        };
+
+        resetFieldName();
+        showAddBodyProperty(isParentComponentBody);
+
+        if (!isPrimitiveType(type) && existedOverrideValueInput) {
+            $(element).next().remove();
+        }
+        if (!isFakerType(type) && existedFakerSelection) {
+            $(element).next().remove();
+        }
+        if (!isEnumType(type) && existedDefaultValueInput) {
+            $(element).next().remove();
+        }
+        if ((!isObjectType(type) && existedNestPropertyHasKey) || (!isArrayOfPrimitiveType(type) && existedNestPropertyNoKey) || (!isEnumType(type) && existedNestPropertyNoKey)) {
+            const className = isParentComponentBody ? '.body-nested-property' : '.response-nested-property';
+            const nestedProperties = $(className);
+            for (const property of nestedProperties) {
+                $(property).parent().parent().remove();
+            }
+            $(element).parent().next().remove();
+        }
+        if (!isObjectType(type) && !isArrayOfPrimitiveType(type) && !isEnumType(type) && existedAddNestedBtn) {
+            $(element).parent().next().remove();
+        }
+        if (!isEntitiesType(type) && existedEntitiesSelect) {
+            $(element).next().remove();
+            resetNestedEntityProperties({ element, isParentComponentBody });
+            createCheckBoxAndLabelComponents(element);
+        }
+    }
+
+    function removeAddNestedPropertyBtnIfExist(event) {
+        return $(event).parent().next()?.remove();
+    }
+
+    function removeCheckBoxAndLabel(element) {
+        const nestedProperties = $(element).parent().children();
+        for (const property of nestedProperties) {
+            if (property.className.includes('checkbox') || property.className.includes('checkbox-label')) {
+                $(property).remove();
+            }
+        }
+    }
+
+    function prepareSelectEntity(element) {
+        removeCheckBoxAndLabel(element);
+
+        $(element).prev().attr('disabled', true);
+        $(element).prev().val('___________________________');
+        $(element).prev().attr('placeholder', '___________________________');
+
+        $(element).next().before(SelectEntitiesComponent());
+    }
+
+    function handleOnchangeTypeSelection(element) {
+        const type = $(element).val();
+        const existedOverrideValueInput = $(element).next()[0].className.includes('override-value-input');
+        const isParentComponentBody = $(element).parent()[0].className.includes('body-property');
+
+        resetNestedProperties({
+            element,
+            type,
+            existedOverrideValueInput,
+            isParentComponentBody
+        });
+
+        if (isPrimitiveType(type) && !existedOverrideValueInput) {
+            $(element).next().before(OverrideValueInputComponent());
+        }
+        if (isFakerType(type)) {
+            $(element).next().before(SelectFakerMethodsComponent());
+        }
+        if (isObjectType(type)) {
+            removeAddNestedPropertyIfExist(element);
+            const nestedPropertyClassName = isParentComponentBody ? 'body-nested-property key' : 'response-nested-property';
+            const nestedProperty = ObjectOrArrayOfObjectComponent({ className: `${nestedPropertyClassName} nested-property nested-property-has-key d-flex me-1 mb-2 ms-4` });
+            $(element).parent().parent().append(nestedProperty);
+        }
+        if (isArrayOfPrimitiveType(type)) {
+            removeAddNestedPropertyIfExist(element);
+            const nestedPropertyClassName = isParentComponentBody ? 'body-nested-property key' : 'response-nested-property';
+            const nestedProperty = ArrayOfNumericTypeComponent({ className: `${nestedPropertyClassName} nested-property nested-property-no-key d-flex me-1 mb-2 ms-4` });
+            $(element).parent().parent().append(nestedProperty);
+        }
+        if (isEnumType(type)) {
+            removeAddNestedPropertyIfExist(element);
+            $(element).next().before(DefaultValueInputComponent());
+            const nestedPropertyClassName = isParentComponentBody ? 'body-nested-property key' : 'response-nested-property';
+            const nestedProperty = ArrayOfEnumPropertyComponent({ className: `${nestedPropertyClassName} nested-property nested-property-no-key d-flex me-1 mb-2 ms-4` });
+            $(element).parent().parent().append(nestedProperty);
+        }
+        if (isEntitiesType(type)) {
+            prepareSelectEntity(element);
+            hideAddBodyProperty(isParentComponentBody);
+        }
+    }
+
+    function resetNestedEntityProperties({ element, isParentComponentBody }) {
+        const existedNestPropertyHasKey = $($(element).parent().next()?.children()[0]).children()[0]?.className?.includes('nested-property-has-key');
+        if (existedNestPropertyHasKey) {
+            const className = isParentComponentBody ? '.body-nested-property' : '.response-nested-property';
+            const nestedProperties = $(className);
+            for (const property of nestedProperties) {
+                $(element).parent().next().remove();
+            }
+            $(element).next().remove();
+        }
+        removeAddNestedPropertyBtnIfExist(element);
+    }
+
+    function handleOnchangeEntitiesSelection({ element, properties }) {
+        const isParentComponentBody = $(element).parent()[0].className.includes('body-property');
+        resetNestedEntityProperties({
+            element,
+            isParentComponentBody
+        });
+
+        const wrapperNestedProperty = CustomWrapperPropertyComponent({ className: 'wrapper-nested-property d-flex flex-column mb-1 ms-5' });
+        const nestedPropertyClassName = isParentComponentBody ? 'body-nested-property key' : 'response-nested-property';
+        const className = `${nestedPropertyClassName} nested-property nested-property-has-key d-flex me-1 mb-2 ms-4`;
+        for (const property of properties) {
+            const nestedProperty = EntityPropertyComponent({
+                keyValue: property.key,
+                typeValue: property.type,
+                className
+            });
+            wrapperNestedProperty.appendChild(nestedProperty);
+        }
+        const addNestedPropertyBtn = AddNestedPropertyButtonComponent({
+            className,
+            nestedPropertyType: 'entity'
+        });
+        wrapperNestedProperty.appendChild(addNestedPropertyBtn);
+
+        $(element).parent().parent().append(wrapperNestedProperty);
+    }
+</script>
