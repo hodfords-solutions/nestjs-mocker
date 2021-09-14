@@ -13,7 +13,7 @@ import { CONFIG_OPTIONS } from "~mocks/constants/config-options.constant";
   imports: [],
   exports: [],
 })
-export class MockApiModule {
+export class MockModule {
   static forRoot(options: MockApiOptions): DynamicModule {
     const optionProvider: ValueProvider<MockApiOptions> = {
       provide: CONFIG_OPTIONS,
@@ -21,9 +21,9 @@ export class MockApiModule {
     };
 
     return {
-      module: MockApiModule,
+      module: MockModule,
       providers: [optionProvider, MockApiService, MockApiCreatorService],
-      exports: [],
+      exports: [MockApiService, MockApiCreatorService],
     };
   }
 }

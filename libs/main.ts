@@ -1,11 +1,11 @@
 import hbs from "hbs";
 import { join } from "path";
 import { NestFactory } from "@nestjs/core";
-import { MockApiModule } from "~mocks/mock.module";
+import { MockModule } from "~mock.module";
 import { NestExpressApplication } from "@nestjs/platform-express";
 
 async function boostrap() {
-  const app = await NestFactory.create<NestExpressApplication>(MockApiModule);
+  const app = await NestFactory.create<NestExpressApplication>(MockModule);
   app.useStaticAssets(join(__dirname, "static"));
   app.setBaseViewsDir(join(__dirname, "views"));
   app.setViewEngine("hbs");
