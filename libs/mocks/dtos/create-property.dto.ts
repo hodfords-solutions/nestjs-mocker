@@ -1,8 +1,8 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsBoolean, IsNotEmpty, IsOptional } from "class-validator";
-import { TypeSelectionEnum } from "~mocks/enums/type-selection.enum";
-import { FakerType } from "~mocks/interfaces/faker-type.interface";
-import { ValidateIfOrExclude } from "~mocks/decorators/validate-if-or-exclude.decorator";
+import { TypeSelectionEnum } from "../enums/type-selection.enum";
+import { ValidateIfOrExclude } from "../decorators/validate-if-or-exclude.decorator";
+import { FakerType } from "../interfaces/faker-type.interface";
 
 export class CreatePropertyDto {
   @ApiProperty()

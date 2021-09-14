@@ -1,7 +1,4 @@
-import { join } from 'path';
-import { MockApiModule } from '../../../libs';
+import { MockModule } from '../../../dist/index';
+import { env } from '~config/env.config';
 
-export const mockApiConfig = MockApiModule.forRoot({
-    path: join(__dirname, 'static/mock-api.json'),
-    maximumRandomResponse: 5
-});
+export const mockApiConfig = MockModule.forRoot(env.MOCK_API);

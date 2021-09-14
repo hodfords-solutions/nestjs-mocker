@@ -35,7 +35,6 @@
     "class-validator": "^0.13.1",
     "faker": "^5.5.3",
     "hbs": "^4.1.2",
-    "tsconfig-paths": "^3.11.0",
     "typeorm": "^0.2.37",
     "uuid": "^8.3.2"
   }

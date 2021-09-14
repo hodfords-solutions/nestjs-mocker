@@ -1,12 +1,16 @@
 import { Injectable } from "@nestjs/common";
-import { CreatePropertyDto } from "~mocks/dtos/create-property.dto";
 import {
   PathsObject,
   SchemaObject,
 } from "@nestjs/swagger/dist/interfaces/open-api-spec.interface";
-import { TypeSelectionEnum } from "~mocks/enums/type-selection.enum";
-import { RequestMethodEnum } from "~mocks/enums/request-method.enum";
 import { v4 as uuidv4 } from "uuid";
+
+import { map } from "lodash";
+import { RequestMethodEnum } from "../enums/request-method.enum";
+import { CreatePropertyDto } from "../dtos/create-property.dto";
+import { SwaggerSpecResponse } from "../types/swagger-spec-response.type";
+import { FakerType } from "../interfaces/faker-type.interface";
+import { TypeSelectionEnum } from "../enums/type-selection.enum";
 import {
   isArrayOfObjectType,
   isArrayOfPrimitiveType,
@@ -14,10 +18,7 @@ import {
   isFakerType,
   isObjectType,
   isUUIDType,
-} from "~mocks/helpers/check-type.helper";
-import { map } from "lodash";
-import { SwaggerSpecResponse } from "~mocks/types/swagger-spec-response.type";
-import { FakerType } from "~mocks/interfaces/faker-type.interface";
+} from "../helpers/check-type.helper";
 
 @Injectable()
 export class SwaggerService {

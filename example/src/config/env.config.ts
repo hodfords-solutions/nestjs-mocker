@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import { join } from 'path';
 
 dotenv.config();
 
@@ -16,5 +17,9 @@ export const env = {
         USER: process.env.DATABASE_USER,
         PASSWORD: process.env.DATABASE_PASSWORD,
         NAME: process.env.DATABASE_NAME
+    },
+    MOCK_API: {
+        path: join(__dirname, 'static/mock-api.json'),
+        maximumRandomResponse: 5
     }
 };

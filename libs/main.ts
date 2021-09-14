@@ -1,8 +1,8 @@
 import hbs from "hbs";
 import { join } from "path";
 import { NestFactory } from "@nestjs/core";
-import { MockModule } from "~mock.module";
 import { NestExpressApplication } from "@nestjs/platform-express";
+import { MockModule } from "./mock.module";
 
 async function boostrap() {
   const app = await NestFactory.create<NestExpressApplication>(MockModule);

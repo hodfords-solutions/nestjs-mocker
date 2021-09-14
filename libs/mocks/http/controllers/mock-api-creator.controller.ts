@@ -1,13 +1,13 @@
 import { Body, Controller, Get, Post, Render } from "@nestjs/common";
 import { ApiOperation } from "@nestjs/swagger";
-import { MockApiCreatorService } from "~mocks/services/mock-api-creator.service";
-import { CreateMockApiDto } from "~mocks/dtos/create-mock-api.dto";
-import { RequestMethodEnum } from "~mocks/enums/request-method.enum";
-import { TypeSelectionEnum } from "~mocks/enums/type-selection.enum";
+import { MockCreatorService } from "../../services/mock-creator.service";
+import { CreateMockApiDto } from "../../dtos/create-mock-api.dto";
+import { RequestMethodEnum } from "../../enums/request-method.enum";
+import { TypeSelectionEnum } from "../../enums/type-selection.enum";
 
 @Controller("mock-api-creator")
 export class MockApiCreatorController {
-  constructor(private mockApiCreatorService: MockApiCreatorService) {}
+  constructor(private mockApiCreatorService: MockCreatorService) {}
 
   @Post()
   @ApiOperation({
@@ -23,8 +23,8 @@ export class MockApiCreatorController {
   })
   @Render("mock-api-creator")
   loadMockApiCreatePage() {
-    const fakerMethods = MockApiCreatorService.listFakerMethods();
-    const entities = MockApiCreatorService.getCurrentEntities([
+    const fakerMethods = MockCreatorService.listFakerMethods();
+    const entities = MockCreatorService.getCurrentEntities([
       "File",
       "User",
       "Otp",

@@ -1,5 +1,5 @@
 import { createParamDecorator, ExecutionContext } from "@nestjs/common";
-import { RequestMethodEnum } from "~mocks/enums/request-method.enum";
+import { RequestMethodEnum } from "../enums/request-method.enum";
 
 export const CustomRequest = createParamDecorator(
   (pathParams, ctx: ExecutionContext) => {

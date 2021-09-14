@@ -1,7 +1,7 @@
-import { RequestMethodEnum } from "~mocks/enums/request-method.enum";
 import { ApiProperty } from "@nestjs/swagger";
 import { IsEnum, IsNotEmpty, IsNumber, IsOptional } from "class-validator";
-import { CreatePropertyDto } from "~mocks/dtos/create-property.dto";
+import { RequestMethodEnum } from "../enums/request-method.enum";
+import { CreatePropertyDto } from "./create-property.dto";
 
 export class CreateMockApiDto {
   @ApiProperty({

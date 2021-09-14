@@ -1,4 +1,4 @@
-export interface MockApiOptions {
+export interface MockOptions {
   path: string;
   maximumRandomResponse: number;
 }

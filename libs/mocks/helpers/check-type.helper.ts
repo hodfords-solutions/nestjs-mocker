@@ -1,4 +1,4 @@
-import { TypeSelectionEnum } from "~mocks/enums/type-selection.enum";
+import { TypeSelectionEnum } from "../enums/type-selection.enum";
 
 export const isArrayOfObjectType = (type) =>
   type === TypeSelectionEnum.ARRAY_OBJECT;

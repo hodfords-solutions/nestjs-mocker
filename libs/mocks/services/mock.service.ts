@@ -1,13 +1,13 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { readFileSync } from "fs";
 import { resolve } from "path";
-import { CustomRequest } from "~mocks/decorators/custom-request.decorator";
-import { CONFIG_OPTIONS } from "~mocks/constants/config-options.constant";
-import { MockApiOptions } from "~mocks/interfaces/mock-api-options.interface";
+import { CONFIG_OPTIONS } from "../constants/config-options.constant";
+import { MockOptions } from "../interfaces/mock-options.interface";
+import { CustomRequest } from "../decorators/custom-request.decorator";
 
 @Injectable()
-export class MockApiService {
-  constructor(@Inject(CONFIG_OPTIONS) private options: MockApiOptions) {}
+export class MockService {
+  constructor(@Inject(CONFIG_OPTIONS) private options: MockOptions) {}
 
   private parseMockApiResponseData() {
     return JSON.parse(

@@ -1,30 +1,31 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { CreateMockApiDto } from "~mocks/dtos/create-mock-api.dto";
 import * as faker from "faker";
 import { v4 as uuidv4 } from "uuid";
-import { CreatePropertyDto } from "~mocks/dtos/create-property.dto";
-import { TypeSelectionEnum } from "~mocks/enums/type-selection.enum";
-import { FakerType } from "~mocks/interfaces/faker-type.interface";
-import { SwaggerService } from "~mocks/services/swagger.service";
+
+import { readFileSync, writeFileSync } from "fs";
+import { map } from "lodash";
+import { getMetadataArgsStorage } from "typeorm";
+import { CONFIG_OPTIONS } from "../constants/config-options.constant";
+import { MockOptions } from "../interfaces/mock-options.interface";
+import { SwaggerService } from "./swagger.service";
+import { ColumnMetaArgs } from "../interfaces/column-meta-args.interface";
+import { TypeSelectionEnum } from "../enums/type-selection.enum";
+import { FakerType } from "../interfaces/faker-type.interface";
+import { CreateMockApiDto } from "../dtos/create-mock-api.dto";
+import { UpdateMockApiJson } from "../interfaces/update-mock-api-json.interface";
+import { CreatePropertyDto } from "../dtos/create-property.dto";
 import {
   isArrayOfObjectType,
   isArrayOfPrimitiveType,
   isEnumType,
   isObjectType,
   isPrimitive,
-} from "~mocks/helpers/check-type.helper";
-import { readFileSync, writeFileSync } from "fs";
-import { UpdateMockApiJson } from "~mocks/interfaces/update-mock-api-json.interface";
-import { map } from "lodash";
-import { getMetadataArgsStorage } from "typeorm";
-import { ColumnMetaArgs } from "~mocks/interfaces/column-meta-args.interface";
-import { CONFIG_OPTIONS } from "~mocks/constants/config-options.constant";
-import { MockApiOptions } from "~mocks/interfaces/mock-api-options.interface";
+} from "../helpers/check-type.helper";
 
 @Injectable()
-export class MockApiCreatorService {
+export class MockCreatorService {
   constructor(
-    @Inject(CONFIG_OPTIONS) private options: MockApiOptions,
+    @Inject(CONFIG_OPTIONS) private options: MockOptions,
     private swaggerService: SwaggerService
   ) {}
 
@@ -120,17 +121,13 @@ export class MockApiCreatorService {
     const { key, type, fakerType, overrideValue } = nestedProperty;
     return key
       ? {
-          [key]: MockApiCreatorService.generateValueByType(
+          [key]: MockCreatorService.generateValueByType(
             type,
             fakerType,
             overrideValue
           ),
         }
-      : MockApiCreatorService.generateValueByType(
-          type,
-          fakerType,
-          overrideValue
-        );
+      : MockCreatorService.generateValueByType(type, fakerType, overrideValue);
   }
 
   static initSchemaIfNotExist(mockApiJSON: any, endpoint: string) {
@@ -174,7 +171,7 @@ export class MockApiCreatorService {
 
       if (isArrayOfPrimitiveType(type)) {
         responses[key] = items.map((nestedProperty) =>
-          MockApiCreatorService.generateNestedProperty(nestedProperty)
+          MockCreatorService.generateNestedProperty(nestedProperty)
         );
       }
 
@@ -183,7 +180,7 @@ export class MockApiCreatorService {
       }
 
       if (isPrimitive(type)) {
-        responses[key] = MockApiCreatorService.generateValueByType(
+        responses[key] = MockCreatorService.generateValueByType(
           type,
           fakerType,
           overrideValue
@@ -227,7 +224,7 @@ export class MockApiCreatorService {
     responses,
   }: UpdateMockApiJson) {
     const mockApiJSON = this.parseMockApiJsonFile();
-    MockApiCreatorService.initSchemaIfNotExist(mockApiJSON, endpoint);
+    MockCreatorService.initSchemaIfNotExist(mockApiJSON, endpoint);
 
     const lowerMethod = method.toLowerCase();
     mockApiJSON.paths[endpoint][lowerMethod] =

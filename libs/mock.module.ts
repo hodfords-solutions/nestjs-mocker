@@ -1,29 +1,28 @@
-import { DynamicModule, Module, ValueProvider } from "@nestjs/common";
-import { MockApiCreatorController } from "~mocks/http/controllers/mock-api-creator.controller";
-import { MockApiController } from "~mocks/http/controllers/mock-api.controller";
-import { MockApiCreatorService } from "~mocks/services/mock-api-creator.service";
-import { SwaggerService } from "~mocks/services/swagger.service";
-import { MockApiService } from "~mocks/services/mock-api.service";
-import { MockApiOptions } from "~mocks/interfaces/mock-api-options.interface";
-import { CONFIG_OPTIONS } from "~mocks/constants/config-options.constant";
+import { DynamicModule, Global, Module, ValueProvider } from "@nestjs/common";
+import { CONFIG_OPTIONS } from "./mocks/constants/config-options.constant";
+import { MockService } from "./mocks/services/mock.service";
+import { MockCreatorService } from "./mocks/services/mock-creator.service";
+import { MockOptions } from "./mocks/interfaces/mock-options.interface";
+import { SwaggerService } from "./mocks/services/swagger.service";
 
-@Module({
-  providers: [MockApiCreatorService, MockApiService, SwaggerService],
-  controllers: [MockApiCreatorController, MockApiController],
-  imports: [],
-  exports: [],
-})
+@Global()
+@Module({})
 export class MockModule {
-  static forRoot(options: MockApiOptions): DynamicModule {
-    const optionProvider: ValueProvider<MockApiOptions> = {
+  static forRoot(options: MockOptions): DynamicModule {
+    const optionProvider: ValueProvider<MockOptions> = {
       provide: CONFIG_OPTIONS,
       useValue: options,
     };
 
     return {
       module: MockModule,
-      providers: [optionProvider, MockApiService, MockApiCreatorService],
-      exports: [MockApiService, MockApiCreatorService],
+      providers: [
+        optionProvider,
+        MockService,
+        MockCreatorService,
+        SwaggerService,
+      ],
+      exports: [MockService, MockCreatorService],
     };
   }
 }

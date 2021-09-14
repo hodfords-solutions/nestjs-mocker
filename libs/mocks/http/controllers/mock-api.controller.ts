@@ -1,12 +1,12 @@
 import { Controller, Delete, Get, Patch, Post, Put } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
-import { MockApiService } from "~mocks/services/mock-api.service";
-import { CustomRequest } from "~mocks/decorators/custom-request.decorator";
+import { MockService } from "../../services/mock.service";
+import { CustomRequest } from "../../decorators/custom-request.decorator";
 
 @Controller("mocks")
 @ApiTags("Mocks")
 export class MockApiController {
-  constructor(private readonly mockApiService: MockApiService) {}
+  constructor(private readonly mockApiService: MockService) {}
 
   @Get("*")
   @ApiOperation({
