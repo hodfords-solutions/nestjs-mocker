@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <title>Mock Api Creat page</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <link rel='stylesheet' href='/index.css'>
+    <link rel='stylesheet' href='/mock-api/index.css'>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"
@@ -42,10 +42,10 @@
                 <div id='endpoint-wrapper' class="input-group">
                     <span class="input-group-text endpoint-group">Endpoint</span>
                     <input
-                        type="text" class="form-control endpoint endpoint-group" placeholder="/users/:id"
-                        aria-label="/users/:id"
-                        aria-describedby="basic-addon2"
-                        required
+                            type="text" class="form-control endpoint endpoint-group" placeholder="/users/:id"
+                            aria-label="/users/:id"
+                            aria-describedby="basic-addon2"
+                            required
                     >
                 </div>
                 <div class='delay-wrapper'>
@@ -86,8 +86,8 @@
             </div>
             <div class="d-flex align-items-end flex-column bd-highlight mt-3">
                 <button
-                    class='add-response-property-btn add-btn btn btn-primary mt-1'
-                    type='submit'
+                        class='add-response-property-btn add-btn btn btn-primary mt-1'
+                        type='submit'
                 >
                     Add API
                 </button>
@@ -585,7 +585,12 @@
         const selectFakerMethods = SelectFakerMethodsComponent();
         divProperty.appendChild(selectFakerMethods);
 
-        const removeBtn = RemoveBtnComponent({ onClick: (element) => $(element).parent().remove() });
+        const removeBtn = RemoveBtnComponent({
+            onClick: (event, element) => {
+                event.preventDefault();
+                $(element).parent().remove();
+            }
+        });
         divProperty.appendChild(removeBtn);
 
         const wrapperProperty = CustomWrapperPropertyComponent({ className: 'wrapper-property d-flex flex-column mb-1' });
@@ -695,19 +700,19 @@
             $(element).next().before(SelectFakerMethodsComponent());
         }
         if (isObjectType(type)) {
-            removeAddNestedPropertyIfExist(element);
+            removeAddNestedPropertyBtnIfExist(element);
             const nestedPropertyClassName = isParentComponentBody ? 'body-nested-property key' : 'response-nested-property';
             const nestedProperty = ObjectOrArrayOfObjectComponent({ className: `${nestedPropertyClassName} nested-property nested-property-has-key d-flex me-1 mb-2 ms-4` });
             $(element).parent().parent().append(nestedProperty);
         }
         if (isArrayOfPrimitiveType(type)) {
-            removeAddNestedPropertyIfExist(element);
+            removeAddNestedPropertyBtnIfExist(element);
             const nestedPropertyClassName = isParentComponentBody ? 'body-nested-property key' : 'response-nested-property';
             const nestedProperty = ArrayOfNumericTypeComponent({ className: `${nestedPropertyClassName} nested-property nested-property-no-key d-flex me-1 mb-2 ms-4` });
             $(element).parent().parent().append(nestedProperty);
         }
         if (isEnumType(type)) {
-            removeAddNestedPropertyIfExist(element);
+            removeAddNestedPropertyBtnIfExist(element);
             $(element).next().before(DefaultValueInputComponent());
             const nestedPropertyClassName = isParentComponentBody ? 'body-nested-property key' : 'response-nested-property';
             const nestedProperty = ArrayOfEnumPropertyComponent({ className: `${nestedPropertyClassName} nested-property nested-property-no-key d-flex me-1 mb-2 ms-4` });
