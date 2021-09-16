@@ -9,26 +9,10 @@ export class BuildingEntity {
     name: string;
 
     @Column({ nullable: true })
-    address: string;
-
-    @Column()
-    locationId: string;
-
-    @Column({ nullable: true })
     postalCode: string;
 
     @Column()
     employeeCount: number;
-
-    @Column({
-        type: 'timestamp'
-    })
-    consumptionPeriodFrom: Date;
-
-    @Column({
-        type: 'timestamp'
-    })
-    consumptionPeriodTo: Date;
 
     @CreateDateColumn({ type: 'timestamp' })
     createdAt: Date;

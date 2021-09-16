@@ -1,7 +1,7 @@
-import { ColumnType } from "typeorm";
+import { ColumnType } from 'typeorm';
 
 export interface ColumnMetaArgs {
-  key: string;
-  type: ColumnType;
-  isRequired: boolean;
+    key: string;
+    type: ColumnType;
+    isRequired: boolean;
 }

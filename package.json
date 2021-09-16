@@ -6,8 +6,9 @@
   "scripts": {
     "format": "prettier --write \"libs/**/*.ts\"",
     "prebuild": "rimraf dist",
-    "build": "tsc",
-    "start:dev": "npm run prebuild && nest start --watch"
+    "copy-files": "copyfiles -u 1 libs/static/** libs/views/** dist/",
+    "build": "tsc && yarn copy-files",
+    "start:dev": "npm run prebuild && yarn copy-files && nest start --watch"
   },
   "repository": {
     "type": "git",
@@ -24,6 +25,7 @@
     "@nestjs/core": "^8.0.6",
     "@nestjs/swagger": "^5.0.9",
     "@types/node": "^16.9.1",
+    "copyfiles": "^2.4.1",
     "prettier": "^2.4.0",
     "rimraf": "^3.0.2",
     "rxjs": "^7.3.0",

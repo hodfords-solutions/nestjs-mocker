@@ -1,4 +1,4 @@
 export interface FakerType {
-  category: string;
-  method: string;
+    category: string;
+    method: string;
 }
