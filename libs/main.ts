@@ -10,8 +10,6 @@ async function boostrap() {
     app.setBaseViewsDir(join(__dirname, 'views'));
     app.setViewEngine('hbs');
     hbs.registerHelper('json', (obj) => new hbs.SafeString(JSON.stringify(obj)));
-
-    await app.listen(3000);
 }
 
 boostrap();
